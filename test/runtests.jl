@@ -1,6 +1,5 @@
 using Test
 using DelimitedFiles
-push!(LOAD_PATH,"C:\\Users\\Joy\\.julia\\dev")
 using SpectralEnvelope
 
 cd(@__DIR__)
