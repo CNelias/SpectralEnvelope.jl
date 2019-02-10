@@ -1,4 +1,4 @@
-# Spectral_envelope
+# Spectral Envelope
 A julia implementation of the spectral envelope method, used in categorical data analysis.
 
 ### Note : I will write a better README soon.
