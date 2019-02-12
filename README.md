@@ -1,3 +1,8 @@
+**Travis**
+:-------:
+[![Build Status](https://travis-ci.com/johncwok/SpectralEnvelope.jl.svg?branch=master)](https://travis-ci.com/johncwok/SpectralEnvelope.jl)
+
+
 # Spectral Envelope
 A julia implementation of the spectral envelope method, used in categorical data analysis.
 
