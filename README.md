@@ -4,7 +4,7 @@
 
 
 # Spectral Envelope
-A julia implementation of the spectral envelope method, used in categorical data analysis.
+A fast and easy to use julia implementation of the spectral envelope method, used in categorical data analysis.
 
 The spectral envelope is a tool to study cyclic behaviors in categorical data in a more efficient way the traditional approach.
 
