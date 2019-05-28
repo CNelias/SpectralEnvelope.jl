@@ -1,6 +1,6 @@
 **Travis**
 :-------:
-[![Build Status](https://travis-ci.com/johncwok/SpectralEnvelope.jl.svg?branch=master)](https://travis-ci.com/johncwok/SpectralEnvelope.jl)
+[![Build Status](https://travis-ci.com/johncwok/SpectralEnvelope.jl.svg?branch=master)
 
 
 # Spectral Envelope
