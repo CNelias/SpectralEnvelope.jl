@@ -10,6 +10,8 @@ The **spectral envelope** is a tool to study cyclic behaviors in categorical dat
 
 For each frequency in the spectrum, the **spectral envelope** finds an optimal real-numbered mapping that maximizes the power-spectral density at this point. Hence the name: no matter what mapping is choosen for each category, the power-spectral density will always be bounded by the spectral envelope.
 
+The spectral envelope was defined by David S. Stoffer in *DAVID S. STOFFER, DAVID E. TYLER, ANDREW J. MCDOUGALL, Spectral analysis for categorical time series: Scaling and the spectral envelope*.\
+
 ### Installation and import :
 ```Julia
 # installing the module
@@ -51,7 +53,3 @@ get_mapping(goal,f,se,mappings,categories)
 ```
 The function scans the vincinity of the provided goal frequency and returns the mappins for the found maxima. It also prints the positions and intensity of the peak so that you may control that you actually identified the desired peak and not a nearby sub-peak.
 In this example, we see that at the frequency ~0.33, the codons A and G have an equivalent mapping and so they have the same function (from the point of view of the time-series).
-
-### Remark :
-The spectral envelope method was defined by David S. Stoffer in *DAVID S. STOFFER, DAVID E. TYLER, ANDREW J. MCDOUGALL, Spectral analysis for categorical time series: Scaling and the spectral envelope*.\
-He also provided an R implementation in his book *Time series analysis and its applications*, however, its is not very user-friendly and extracting the optimal mappings with it is really not straightforward.
