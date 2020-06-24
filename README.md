@@ -1,6 +1,8 @@
 **Travis**
 :-------:
-[![Build Status](https://travis-ci.com/johncwok/SpectralEnvelope.jl.svg?branch=master)](https://travis-ci.com/johncwok/SpectralEnvelope.jl)
+[![Build Status](https://travis-ci.com/johncwok/SpectralEnvelope.jl.svg?branch=master)](https://travis-ci.com/johncwok/SpectralEnvelope.jl) [![Build status](https://ci.appveyor.com/api/projects/status/q9ets366or6204u6?svg=true)](https://ci.appveyor.com/project/johncwok/spectralenvelope-jl)
+
+
 
 
 # Spectral Envelope
