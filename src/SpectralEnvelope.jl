@@ -194,7 +194,7 @@ returns the mappins attribute to the input frequency
         - freq : the list of frequencies given out by the spectral envelope analysis
         - se : the value of the spectral envelope at the requencies from freq
         - eigvecs : the eigenvectors from the spectral envelope analysis
-        - categories : the different categories in your data
+        - categories : the different categories in the data
 
     returns :
         prints the value of peak and its positions
