@@ -213,8 +213,8 @@ function get_mappings(goal,freq,se,eigvecs,categories)
     window = Int(div(0.04*length(freq),1))
     peak_pos = findmin([abs(goal - delta*i) for i in 1:length(freq)])[2]
     true_pos = findmax(se[peak_pos-window:peak_pos+window])[2] + peak_pos - window - 1
-    mappings = [string(categories[i]," : ",round(eigvecs[true_pos,i];digits = 3)) for i in 1:length(categories)-1]
-    println("position of peak: ",freq[true_pos]," strengh of peak: ",se[true_pos])
+    mappings = [string(categories[i]," : ",round(eigvecs[true_pos,i]; digits = 3)) for i in 1:length(categories)]
+    println("position of peak: ",round(freq[true_pos],digits = 2)," strengh of peak: ",round(se[true_pos], digits = 2))
     return mappings
 end
 
