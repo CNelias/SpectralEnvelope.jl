@@ -48,10 +48,10 @@ plot(f, se)
 To get the **optimal mappings** for a given frequency more easily, you can use the ```get_mapping(goal, f, se, mappings, categories)``` function (you can use spalting for a more concise call) :
 ```Julia
 f,se,mappings,categories =spectral_envelope(data; m =0)
-get_mapping(goal,f,se,mappings,categories)
+get_mapping(0.33,f,se,mappings,categories)
 # using spalting : get_mapping(goal, spectral_envelope(data;m=0)…)
->> position of peak: 0.3338  strength of peak: 0.8067 
- ["A : -0.3959646304003992", "G : -0.3930054480816879", "T : 0.8282155690720968", "C : 0.1326439759143416"]
+position of peak: 0.33 strengh of peak: 0.86
+["a : 0.702", "c : 0.702", "g : 0.561", "t : 0.233"]
 ```
 The function scans the vincinity of the provided goal frequency and returns the mapping for the found maxima. It also prints the positions and intensity of the peak so that you may control that you actually identified the desired peak and not a nearby sub-peak.<br/>
 In this example, we see that at the frequency ~0.33, the codons A and G have an equivalent mapping and so they have the same function (from the point of view of the time-series).
