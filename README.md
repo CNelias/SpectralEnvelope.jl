@@ -14,25 +14,18 @@ For each frequency in the spectrum, the **spectral envelope** finds an optimal r
 
 The spectral envelope was defined by David S. Stoffer in *DAVID S. STOFFER, DAVID E. TYLER, ANDREW J. MCDOUGALL, Spectral analysis for categorical time series: Scaling and the spectral envelope*.\
 
-### Installation and import :
-```Julia
-# installing the module
-Using Pkg
-Pkg.clone(“https://github.com/johncwok/SpectralEnvelope.jl.git”)
-# importing the module
-Using SpectralEnvelope
-```
 ## Usage :
+The main function of the module is:
 ```spectral_envelope 
 spectral_envelope(ts; m = 3)
 
   Input
-    -ts : array containing the time series to be analysed.
-    -m : the smoothing parameter. It’s value corresponds to how many neighboring points 
-        are to be taken in account in the smoothing. Defaults to 3.
+    -ts : Array containing the time series to be analysed.
+    -m : Smoothing parameter. corresponds to how many neighboring points 
+        are to be involved in the smoothing (weighted average). Defaults to 3.
   Returns 
-    -freq : An array containing the frequency of the power-spectrum (or spectral envelope)
-    -se : the value of the spectral envelope for each frequency value.
+    -freq : Array containing the frequency of the power-spectrum (or spectral envelope)
+    -se : Values of the spectral envelope for each frequency in 'freq'.
     -eigvec : Array containing the optimal real-valued mapping for each frequency point.
     -categories : the categories which are present in the data.
 ```
@@ -55,3 +48,12 @@ position of peak: 0.33 strengh of peak: 0.86
 ```
 The function scans the vincinity of the provided goal frequency and returns the mapping for the found maxima. It also prints the positions and intensity of the peak so that you may control that you actually identified the desired peak and not a nearby sub-peak.<br/>
 In this example, we see that at the frequency ~0.33, the codons A and G have an equivalent mapping and so they have the same function (from the point of view of the time-series).
+
+### Installation and import :
+```Julia
+# installing the module
+Using Pkg
+Pkg.clone(“https://github.com/johncwok/SpectralEnvelope.jl.git”)
+# importing the module
+Using SpectralEnvelope
+```
