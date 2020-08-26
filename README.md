@@ -15,7 +15,7 @@ For each frequency in the spectrum, the **spectral envelope** finds an optimal r
 The spectral envelope was defined by David S. Stoffer in *DAVID S. STOFFER, DAVID E. TYLER, ANDREW J. MCDOUGALL, Spectral analysis for categorical time series: Scaling and the spectral envelope*.\
 
 ## Usage :
-The main function of the module is:
+The main function is:
 ```spectral_envelope 
 spectral_envelope(ts; m = 3)
 
