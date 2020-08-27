@@ -59,6 +59,6 @@ Using SpectralEnvelope
 ```
 
 ## To-do
-* Implement detrending and windowing (periodogram bias correction).
+* Implement windowing & averaging (periodogram bias correction).
 * Implement bootstrap confidence intervals.
 * Make the extraction of optimal mappings more user-friendly.
