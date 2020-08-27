@@ -59,4 +59,5 @@ Using SpectralEnvelope
 ```
 
 ## To-do
-Implement windowing procedure for detrending.
+* Implement windowing procedure for detrending.
+* Make the extraction of optimal mappings more user-friendly
