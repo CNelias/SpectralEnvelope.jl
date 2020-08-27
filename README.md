@@ -60,4 +60,5 @@ Using SpectralEnvelope
 
 ## To-do
 * Implement detrending and windowing for bias correction.
-* Make the extraction of optimal mappings more user-friendly
+* Implement bootstrap confidence intervals.
+* Make the extraction of optimal mappings more user-friendly.
