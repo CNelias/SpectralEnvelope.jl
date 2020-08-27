@@ -107,14 +107,14 @@ returns the power spectrum of a given time serie,
 You will have to provide the frequencies yourself
 """
 
-function power_spectrum(x::Array{Float64,1},window::Int,step::Int)
+function power_spectrum(x::Array{Float64,1}, window::Int, step::Int)
     ts = partitioning(x,window,step)
     ps = [real(fft(i .- mean(i)).*conj(fft(i .- mean(i)))) for i in ts]
     pxx = mean(ps)
     return [pxx[i] for i in 1:div(window,2)]
 end
 
-function periodogram_matrix(ts::Array{Float64,2};smoothing_degree=3)
+function periodogram_matrix(ts::Array{Float64,2}; smoothing_degree=3)
     periodo = zeros(Float64,length(ts[:,1]),length(ts[:,1]),length(ts[1,:]))
     for i in 1:length(ts[:,1])
         for j in 1:length(ts[:,1])
@@ -136,18 +136,17 @@ Computes the covariance-variance matrix of a given time-series.
 """
 
 function varcov(ts::Array{Float64,2})
-    cov_matrix = zeros(Float64,length(ts[:,1]),length(ts[:,1]))
+    cov_matrix = zeros(length(ts[:,1]), length(ts[:,1]))
     for i in 1:length(ts[:,1])
-        for j in 1:length(ts[:,1])
-            if cov_matrix[i,j] == NaN || cov_matrix[i,j] == Inf
-                print("Unexpected NaN or Inf at position", i,j)
+            if cov_matrix[i,i] == NaN || cov_matrix[i,i] == Inf
+                print("Unexpected NaN or Inf at position", i)
             else
-                cov_matrix[i,j] = sum((1/(length(ts[1,:]).-1))*(ts[i,:].-mean(ts[i,:])).*(ts[j,:].-mean(ts[j,:])))
+            cov_matrix[i,i] = sum((1/(length(ts[1,:])-1))*(ts[i,:].-mean(ts[i,:])).*(ts[i,:].-mean(ts[i,:])))
             end
-        end
     end
     return cov_matrix
 end
+
 
 """
 Computes the spectral envelope of the given time-series.
@@ -184,7 +183,6 @@ function spectral_envelope(ts; m = 3)
         eigvec = reshape(Array{Float64}(eigvec_any),length(unique(ts)),:)'
         return collect(1:length(result))/length(ts),result[1:end],eigvec,unique(ts)
 end
-
 
 """
 returns the mappins attribute to the input frequency
