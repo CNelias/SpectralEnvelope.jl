@@ -14,7 +14,7 @@ For each frequency in the spectrum, the **spectral envelope** finds an optimal r
 
 The spectral envelope was defined by David S. Stoffer in *DAVID S. STOFFER, DAVID E. TYLER, ANDREW J. MCDOUGALL, Spectral analysis for categorical time series: Scaling and the spectral envelope*.\
 
-## Usage :
+## Usage 
 The main function is:
 ```spectral_envelope 
 spectral_envelope(ts; m = 3)
@@ -49,7 +49,7 @@ position of peak: 0.33 strengh of peak: 0.86
 The function scans the vincinity of the provided goal frequency and returns the mapping for the found maxima. It also prints the positions and intensity of the peak so that you may control that you actually identified the desired peak and not a nearby sub-peak.<br/>
 In this example, we see that at the frequency ~0.33, the codons A and G have an equivalent mapping and so they have the same function (from the point of view of the time-series).
 
-### Installation and import :
+### Installation and import 
 ```Julia
 # installing the module
 Using Pkg
@@ -57,3 +57,6 @@ Pkg.clone(“https://github.com/johncwok/SpectralEnvelope.jl.git”)
 # importing the module
 Using SpectralEnvelope
 ```
+
+## To-do
+Implement windowing procedure for detrending.
