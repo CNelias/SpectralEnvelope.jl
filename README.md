@@ -40,17 +40,20 @@ f, se, eigvecs = spectral_envelope(data; m = 4)
 # plotting the results
 plot(f, se, xlabel = "Frequency", ylabel = "Intensity", title = "test data: extract of Epstein virus DNA", label = "spectral envelope")
 ```
-<img src=https://user-images.githubusercontent.com/34754896/91550431-d2092600-e928-11ea-8547-7fc086d41d7d.PNG width = "600">
+<img src=https://user-images.githubusercontent.com/34754896/91556982-eef72680-e933-11ea-85f3-fab6aea17258.PNG width = "600">
+
 
 To get the **optimal mappings** for a given frequency, you can use the ```get_mapping(data, freq; m = 3)```. With the previous DNA example, we see a peak at 0.33. To get the corresponding mappings:
 ```Julia
 mappings = get_mappings(data, 0.33)
->> position of peak: 0.33 strengh of peak: 0.43
+>> position of peak: 0.33 strengh of peak: 0.6
 print(mappings)
->> ["A : 0.58", "G : -0.59", "T : 0.68", "C : 0.0"]
+>> ["A : 0.5", "G : 0.64", "T : 0.64", "C : 0.0"]
 ```
+
+
 The function scans the vincinity of the provided goal frequency and returns the mapping for the found maxima. It also prints the positions and intensity of the peak so that you may control that you actually identified the desired peak and not a nearby sub-peak.<br/>
-The codons A and T have an equivalent mapping and so they have similar functions (from the point of view of the time-series).
+The codons A and T have the same mapping and so they have similar functions (from the point of view of the time-series).
 
 ### Installation and import 
 ```Julia
