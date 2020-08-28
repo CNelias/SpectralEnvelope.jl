@@ -31,9 +31,12 @@ spectral_envelope(ts; m = 3)
 ```
 To use the spectral envelope, call the function ```spectral_envelope```, you can then easily plot the results and extract the mapping for a given frequency.
 ```Julia
-f, se, mappings, categories = spectral_envelope(data; m = 4)
-#plotting the results
-Using Plots
+using DelimitedFiles, Plots
+# extracting data
+data = readdlm("..\\test\\DNA_data.txt")
+# spectral envelope analysis
+f, se, eigvecs = spectral_envelope(data; m = 4)
+# plotting the results
 plot(f, se)
 ```
 <img src=https://user-images.githubusercontent.com/34754896/91550431-d2092600-e928-11ea-8547-7fc086d41d7d.PNG width = "600">
