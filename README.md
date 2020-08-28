@@ -38,7 +38,7 @@ data = readdlm("..\\test\\DNA_data.txt")
 # spectral envelope analysis
 f, se, eigvecs = spectral_envelope(data; m = 4)
 # plotting the results
-plot(f, se)
+plot(f, se, xlabel = "Frequency", ylabel = "Intensity", title = "test data: extract of Epstein virus DNA", label = "spectral envelope")
 ```
 <img src=https://user-images.githubusercontent.com/34754896/91550431-d2092600-e928-11ea-8547-7fc086d41d7d.PNG width = "600">
 
