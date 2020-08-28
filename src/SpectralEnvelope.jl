@@ -52,19 +52,20 @@ function smooth(data::Array{Float64,1}; m = 5)
 end
 
 """
-Realizes the one-hot encoding of the time-series.
-each category gets associated to a vector.
+One-hot encodes the time-series. For k categories,
+each category gets a k-1 unit vector, except the last one which
+is mapped to zeros(k - 1).
 
     Example:
 
     vectorize([1,2,3,1,2]) returns :
-    [[1,0,0],[0,1,0],[0,0,1],[1,0,0]]
+    [[1,0],[0,1],[0,0],[1,0]]
 
 """
 
 function vectorize(data)
     categories = unique(data)
-    #deleteat!(categories,length(categories))
+    deleteat!(categories,length(categories))
     sorted_data = zeros(length(categories),length(data))
     for (t,d) in enumerate(data)
         for (i,j) in enumerate(categories)
@@ -75,6 +76,7 @@ function vectorize(data)
     end
     return sorted_data
 end
+
 
 """
 Splits the time-series into overlapping equal-lengthed chunks of given size.
@@ -115,7 +117,7 @@ function power_spectrum(x::Array{Float64,1}, window::Int, step::Int)
 end
 
 function periodogram_matrix(ts::Array{Float64,2}; smoothing_degree=3)
-    periodo = zeros(Float64,length(ts[:,1]),length(ts[:,1]),length(ts[1,:]))
+    periodo = zeros(Float64, length(ts[:,1]), length(ts[:,1]), length(ts[1,:]))
     for i in 1:length(ts[:,1])
         for j in 1:length(ts[:,1])
             tmp = smooth(real((1/length(ts[1,:]))*fft(ts[i,:]).*(conj(fft(ts[j,:])))); m= smoothing_degree)
@@ -170,49 +172,46 @@ Computes the spectral envelope of the given time-series.
 function spectral_envelope(ts; m = 3)
     result = Float64[]
     eigvec_any = []
-        S = sqrt(varcov(vectorize(ts)))
-        p = periodogram_matrix(vectorize(ts); smoothing_degree = m)
-        for i in 1:trunc(Int,length(ts)/2)
-            if any(isnan.(S*p[:,:,i]*S))
-                print("unexpected NaN at position : ", i,"\n", S,"\t")
-            else
-                append!(result,findmax(real(eigvals(S*p[:,:,i]*S)))[1])
-                append!(eigvec_any,real(eigvecs(S*p[:,:,i]*S))[findmax(real(eigvals(S*p[:,:,i]*S)))[2],:])
-            end
+    S = sqrt(varcov(vectorize(ts)))
+    p = periodogram_matrix(vectorize(ts); smoothing_degree = m)
+    for i in 1:trunc(Int,length(ts)/2)
+        if any(isnan.(S*p[:,:,i]*S))
+            print("unexpected NaN at position : ", i,"\n", S,"\t")
+        else
+            append!(result,findmax(real(eigvals(S*p[:,:,i]*S)))[1])
+            append!(eigvec_any,real(eigvecs(S*p[:,:,i]*S))[findmax(real(eigvals(S*p[:,:,i]*S)))[2],:])
         end
-        eigvec = reshape(Array{Float64}(eigvec_any),length(unique(ts)),:)'
-        return collect(1:length(result))/length(ts),result[1:end],eigvec,unique(ts)
+    end
+    eigvec = reshape(Array{Float64}(eigvec_any),length(unique(ts)),:)'
+    return collect(1:length(result))/length(ts), result[1:end], eigvec
 end
 
 """
-returns the mappins attribute to the input frequency
+     get_mappings(data, freq; m = 3)
 
-    input :
-        - goal : the frequency for which you want to know the mappings
-        - freq : the list of frequencies given out by the spectral envelope analysis
-        - se : the value of the spectral envelope at the requencies from freq
-        - eigvecs : the eigenvectors from the spectral envelope analysis
-        - categories : the different categories in the data
+Returns the optimal mappings corresponding to the frequency 'freq'.
+Prints the position and strengh of peak at 'f' for control purposes.
+input :
+    - data : input categorical time series
+    - freq : the frequency where one wants the optimal mappings
+    - m : smoothing parameters (see 'spectral_envelope')
+returns :
+    - mappings : the mapping at the peak associated with the desired frequency.
 
-    returns :
-        prints the value of peak and its positions
-        - mappings : the mapping at the peak associated with the desired frequency.
-
-    example:
-        # we have some data, and see a peak at 0.33
-        x,y,e,c = spectral_envelope(data)
-        get_mappings(0.33,x,y,e,c)
-        # alternative calling
-        results = spectral_envelope(data)
-        get_mappings(0.33,results...)
+example:
+    # we have some data, plotting the spectral envelope, we see a peak at 0.33
+    m = get_mappings(data, 0.33)
 """
-function get_mappings(goal,freq,se,eigvecs,categories)
-    delta = freq[2] - freq[1]
-    window = Int(div(0.04*length(freq),1))
-    peak_pos = findmin([abs(goal - delta*i) for i in 1:length(freq)])[2]
+function get_mappings(data, freq; m = 3)
+    categories = unique(data)
+    f, se, eigvecs = spectral_envelope(data; m = m)
+    delta = f[2] - f[1]
+    window = Int(div(0.04*length(f),1))
+    peak_pos = findmin([abs(freq - delta*i) for i in 1:length(f)])[2]
     true_pos = findmax(se[peak_pos-window:peak_pos+window])[2] + peak_pos - window - 1
-    mappings = [string(categories[i]," : ",round(eigvecs[true_pos,i]; digits = 3)) for i in 1:length(categories)]
-    println("position of peak: ",round(freq[true_pos],digits = 2)," strengh of peak: ",round(se[true_pos], digits = 2))
+    mappings = [string(categories[i]," : ",round(eigvecs[true_pos,i]; digits = 2)) for i in 1:length(categories)-1]
+    push!(mappings, string(categories[end]," : ", 0.0))
+    println("position of peak: ",round(f[true_pos],digits = 2)," strengh of peak: ",round(se[true_pos], digits = 2))
     return mappings
 end
 
