@@ -29,25 +29,28 @@ spectral_envelope(ts; m = 3)
     -eigvec : Array containing the optimal real-valued mapping for each frequency point.
     -categories : the categories which are present in the data.
 ```
-To use the spectral envelope, call the function ```spectral_envelope```, you can then easily plot the results and extract the mapping for a given frequency.
+To use the spectral envelope, call the function ```spectral_envelope```, you can then easily plot the results and extract the mapping for a given frequency. 
+Here is an example with DNA data from a portion of the Epstein virus:
 ```Julia
-f, se, mappings, categories = spectral_envelope(data; m = 4)
-#plotting the results
-Using Plots
-plot(f, se)
+using DelimitedFiles, Plots
+# extracting data
+data = readdlm("..\\test\\DNA_data.txt")
+# spectral envelope analysis
+f, se, eigvecs = spectral_envelope(data; m = 4)
+# plotting the results
+plot(f, se, xlabel = "Frequency", ylabel = "Intensity", title = "test data: extract of Epstein virus DNA", label = "spectral envelope")
 ```
-<img src=https://user-images.githubusercontent.com/34754896/81937423-e5031f00-95f3-11ea-986d-bb5a3689639f.png width = "600">
+<img src=https://user-images.githubusercontent.com/34754896/91550431-d2092600-e928-11ea-8547-7fc086d41d7d.PNG width = "600">
 
-To get the **optimal mappings** for a given frequency more easily, you can use the ```get_mapping(goal, f, se, mappings, categories)``` function (you can use spalting for a more concise call) :
+To get the **optimal mappings** for a given frequency, you can use the ```get_mapping(data, freq; m = 3)```. With the previous DNA example, we see a peak at 0.33. To get the corresponding mappings:
 ```Julia
-f,se,mappings,categories =spectral_envelope(data; m =0)
-get_mapping(0.33,f,se,mappings,categories)
-# using spalting : get_mapping(goal, spectral_envelope(data;m=0)…)
-position of peak: 0.33 strengh of peak: 0.86
-["A : 0.702", "G : 0.702", "T : 0.561", "C : 0.233"]
+mappings = get_mappings(data, 0.33)
+>> position of peak: 0.33 strengh of peak: 0.43
+print(mappings)
+>> ["A : 0.58", "G : -0.59", "T : 0.68", "C : 0.0"]
 ```
 The function scans the vincinity of the provided goal frequency and returns the mapping for the found maxima. It also prints the positions and intensity of the peak so that you may control that you actually identified the desired peak and not a nearby sub-peak.<br/>
-In this example, we see that at the frequency ~0.33, the codons A and G have an equivalent mapping and so they have the same function (from the point of view of the time-series).
+The codons A and T have an equivalent mapping and so they have similar functions (from the point of view of the time-series).
 
 ### Installation and import 
 ```Julia
@@ -61,4 +64,3 @@ Using SpectralEnvelope
 ## To-do
 * Implement windowing & averaging (periodogram bias correction).
 * Implement bootstrap confidence intervals.
-* Make the extraction of optimal mappings more user-friendly.
