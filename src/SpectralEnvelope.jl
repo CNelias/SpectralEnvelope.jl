@@ -1,4 +1,4 @@
-module SpectralEnvelope
+# module SpectralEnvelope
 
 using FFTW
 using Polynomials
@@ -174,19 +174,26 @@ Computes the spectral envelope of the given time-series.
 function spectral_envelope(ts; m = 3)
     result = Float64[]
     eigvec_any = []
-    S = sqrt(varcov(vectorize(ts)))
+    S = inv(sqrt(varcov(vectorize(ts))))
     p = periodogram_matrix(vectorize(ts); smoothing_degree = m)
     for i in 1:trunc(Int,length(ts)/2)
         if any(isnan.(S*p[:,:,i]*S))
             print("unexpected NaN at position : ", i,"\n", S,"\t")
         else
-            append!(result,findmax(real(eigvals(S*p[:,:,i]*S)))[1])
-            append!(eigvec_any,real(eigvecs(S*p[:,:,i]*S))[findmax(real(eigvals(S*p[:,:,i]*S)))[2],:])
+            append!(result,findmax(eigvals(S*p[:,:,i]*S))[1])
+            b = eigvecs(S*p[:,:,i]*S)[findmax(eigvals(S*p[:,:,i]*S))[2],:]
+            append!(eigvec_any, inv(S)*b)
         end
     end
     eigvec = reshape(Array{Float64}(eigvec_any),length(unique(ts)),:)'
     return collect(1:length(result))/length(ts), result[1:end], eigvec
 end
+
+using DelimitedFiles, Plots
+data = readdlm("C:\\Users\\cnelias\\.julia\\dev\\SpectralEnvelope\\test\\DNA_data.txt")[1,:]
+f, se = spectral_envelope(data; m = 1)
+display(plot(f[5:end],se[5:end]))
+print(get_mappings(data, 0.33))
 
 """
      get_mappings(data, freq; m = 3)
@@ -231,6 +238,8 @@ function findmax_in(xserie,yserie,xlim)
 end
 
 
-export spectral_envelope, get_mappings, detrend, smooth, power_spectrum
 
-end
+
+# export spectral_envelope, get_mappings, detrend, smooth, power_spectrum
+#
+# end
