@@ -140,11 +140,13 @@ Computes the covariance-variance matrix of a given time-series.
 function varcov(ts::Array{Float64,2})
     cov_matrix = zeros(length(ts[:,1]), length(ts[:,1]))
     for i in 1:length(ts[:,1])
+        for j in 1:length(ts[:,1])
             if cov_matrix[i,i] == NaN || cov_matrix[i,i] == Inf
                 print("Unexpected NaN or Inf at position", i)
             else
-            cov_matrix[i,i] = sum((1/(length(ts[1,:])-1))*(ts[i,:].-mean(ts[i,:])).*(ts[i,:].-mean(ts[i,:])))
+            cov_matrix[i,j] = sum((1/(length(ts[1,:])-1))*(ts[i,:].-mean(ts[i,:])).*(ts[j,:].-mean(ts[j,:])))
             end
+        end
     end
     return cov_matrix
 end
