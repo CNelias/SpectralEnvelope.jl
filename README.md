@@ -29,7 +29,8 @@ spectral_envelope(ts; m = 3)
     -eigvec : Array containing the optimal real-valued mapping for each frequency point.
     -categories : the categories which are present in the data.
 ```
-To use the spectral envelope, call the function ```spectral_envelope```, you can then easily plot the results and extract the mapping for a given frequency.
+To use the spectral envelope, call the function ```spectral_envelope```, you can then easily plot the results and extract the mapping for a given frequency. 
+Here is an example with DNA data from a portion of the Epstein virus:
 ```Julia
 using DelimitedFiles, Plots
 # extracting data
