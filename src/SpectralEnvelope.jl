@@ -65,7 +65,8 @@ is mapped to zeros(k - 1).
 
 function vectorize(data)
     categories = unique(data)
-    deleteat!(categories,length(categories))
+    # deleteat!(categories,length(categories))
+    # deleteat!(categories,1)
     sorted_data = zeros(length(categories),length(data))
     for (t,d) in enumerate(data)
         for (i,j) in enumerate(categories)
@@ -101,7 +102,7 @@ returns the power spectrum of a given time serie,
     input :
     - time serie
     - window for averaging (default = length(time serie)/10)
-    - step for the windo's sliding
+    - step for the window's sliding
 
     output :
     - value of the power spectrum
@@ -116,22 +117,43 @@ function power_spectrum(x::Array{Float64,1}, window::Int, step::Int)
     return [pxx[i] for i in 1:div(window,2)]
 end
 
-function periodogram_matrix(ts::Array{Float64,2}; smoothing_degree=3)
-    periodo = zeros(Float64, length(ts[:,1]), length(ts[:,1]), length(ts[1,:]))
+function periodogram_matrix(ts::Array{Float64,2}; m=3)
+    periodo = zeros(length(ts[:,1]), length(ts[:,1]), length(ts[1,:]))
+    DFT = zeros(Complex{Float64}, length(ts[:,1]), length(ts[1,:]))
+    for i in 1:length(ts[:,1])
+        DFT[i,:] = fft(ts[i,:] .- mean(ts[i,:]))
+    end
     for i in 1:length(ts[:,1])
         for j in 1:length(ts[:,1])
-            tmp = smooth(real((1/length(ts[1,:]))*fft(ts[i,:]).*(conj(fft(ts[j,:])))); m= smoothing_degree)
-            for w in 1:length(ts[1,:])-(2*smoothing_degree+1)
-                if tmp[w] == NaN || tmp[w] == Inf
-                    print("Unexpected NaN or Inf at position", w)
-                else
+            tmp = smooth(real((1/length(ts[1,:]))*DFT[i,:].*conj(DFT[j,:])); m = m)
+            for w in 1:length(ts[1,:])-(2*m+1)
                 periodo[i,j,w] = tmp[w]
-                end
             end
         end
     end
     return periodo
 end
+
+# function periodogram_matrix(ts::Array{Float64,2}, substract_mean = true; smoothing_degree=3)
+#     periodo = zeros(Float64, length(ts[:,1]), length(ts[:,1]), length(ts[1,:]))
+#
+#     for i in 1:length(ts[:,1])
+#         for j in 1:length(ts[:,1])
+#             tmp = smooth(real((1/length(ts[1,:]))*fft(ts[i,:]).*(conj(fft(ts[j,:])))); m= smoothing_degree)
+#             for w in 1:length(ts[1,:])-(2*smoothing_degree+1)
+#                 if tmp[w] == NaN || tmp[w] == Inf
+#                     print("Unexpected NaN or Inf at position", w)
+#                 else
+#                 periodo[i,j,w] = tmp[w]
+#                 end
+#             end
+#         end
+#     end
+#     return periodo
+# end
+
+
+
 
 """
 Computes the covariance-variance matrix of a given time-series.
@@ -141,11 +163,7 @@ function varcov(ts::Array{Float64,2})
     cov_matrix = zeros(length(ts[:,1]), length(ts[:,1]))
     for i in 1:length(ts[:,1])
         for j in 1:length(ts[:,1])
-            if cov_matrix[i,i] == NaN || cov_matrix[i,i] == Inf
-                print("Unexpected NaN or Inf at position", i)
-            else
             cov_matrix[i,j] = sum((1/(length(ts[1,:])-1))*(ts[i,:].-mean(ts[i,:])).*(ts[j,:].-mean(ts[j,:])))
-            end
         end
     end
     return cov_matrix
@@ -190,25 +208,16 @@ function spectral_envelope(ts; m = 3)
     vec = vectorize(ts)
     S = inv(sqrt(varcov(vec)))
     display(S)
-    p = periodogram_matrix(vec; smoothing_degree = m)
+    p = periodogram_matrix(vec; m = m)
     for i in 1:trunc(Int,length(ts)/2)
-        if any(isnan.(S*p[:,:,i]*S))
-            print("unexpected NaN at position : ", i,"\n", S,"\t")
-        else
-            append!(result,findmax(eigvals(S*p[:,:,i]*S))[1])
-            b = eigvecs(S*p[:,:,i]*S)[findmax(eigvals(S*p[:,:,i]*S))[2],:]
-            append!(eigvec_any, inv(S)*b)
-        end
+        append!(result,findmax(eigvals(2*S*p[:,:,i]*S/length(ts)))[1])
+        b = S*eigvecs(S*p[:,:,i]*S)[findmax(eigvals(S*p[:,:,i]*S))[2],:]
+        append!(eigvec_any, b )
     end
     eigvec = reshape(Array{Float64}(eigvec_any),length(unique(ts)),:)'
     return collect(1:length(result))/length(ts), result[1:end], eigvec
 end
 
-using DelimitedFiles, Plots
-data = readdlm("C:\\Users\\cnelias\\.julia\\dev\\SpectralEnvelope\\test\\DNA_data.txt")[1,:]
-f, se = spectral_envelope(data; m = 1)
-display(plot(f[5:end],se[5:end]))
-print(get_mappings(data, 0.33))
 
 """
      get_mappings(data, freq; m = 3)
@@ -233,11 +242,17 @@ function get_mappings(data, freq; m = 3)
     window = Int(div(0.04*length(f),1))
     peak_pos = findmin([abs(freq - delta*i) for i in 1:length(f)])[2]
     true_pos = findmax(se[peak_pos-window:peak_pos+window])[2] + peak_pos - window - 1
-    mappings = [string(categories[i]," : ",round(eigvecs[true_pos,i]; digits = 2)) for i in 1:length(categories)-1]
-    push!(mappings, string(categories[end]," : ", 0.0))
+    mappings = [string(categories[i]," : ",round(eigvecs[true_pos,i]; digits = 2)) for i in 1:length(categories)]#-1]
+    # push!(mappings, string(categories[end]," : ", 0.0))
     println("position of peak: ",round(f[true_pos],digits = 2)," strengh of peak: ",round(se[true_pos], digits = 2))
     return mappings
 end
+
+using DelimitedFiles, Plots
+data = readdlm("C:\\Users\\cnelias\\.julia\\dev\\SpectralEnvelope\\test\\DNA_data.txt")[1,:]
+f, se = spectral_envelope(data; m = 1)
+display(plot(f,100*se))
+print(get_mappings(data, 0.33))
 
 function findmax_in(xserie,yserie,xlim)
     range = []
