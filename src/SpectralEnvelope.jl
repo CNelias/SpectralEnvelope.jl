@@ -151,6 +151,19 @@ function varcov(ts::Array{Float64,2})
     return cov_matrix
 end
 
+# function varcov(ts::Array{Float64,2})
+#     proba = sum(ts, dims = 2)./length(ts[1,:])
+#     cov_matrix = zeros(length(ts[:,1]), length(ts[:,1]))
+#     for i in 1:length(ts[:,1])
+#         if cov_matrix[i,i] == NaN || cov_matrix[i,i] == Inf
+#             print("Unexpected NaN or Inf at position", i)
+#         else
+#         cov_matrix[i,i] = proba[i] - proba[i].^2
+#         end
+#     end
+#     return cov_matrix
+# end
+
 
 """
 Computes the spectral envelope of the given time-series.
@@ -174,8 +187,10 @@ Computes the spectral envelope of the given time-series.
 function spectral_envelope(ts; m = 3)
     result = Float64[]
     eigvec_any = []
-    S = inv(sqrt(varcov(vectorize(ts))))
-    p = periodogram_matrix(vectorize(ts); smoothing_degree = m)
+    vec = vectorize(ts)
+    S = inv(sqrt(varcov(vec)))
+    display(S)
+    p = periodogram_matrix(vec; smoothing_degree = m)
     for i in 1:trunc(Int,length(ts)/2)
         if any(isnan.(S*p[:,:,i]*S))
             print("unexpected NaN at position : ", i,"\n", S,"\t")
