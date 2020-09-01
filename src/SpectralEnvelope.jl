@@ -206,14 +206,15 @@ function spectral_envelope(ts; m = 3)
     result = Float64[]
     vec = vectorize(ts)
     eigvec = zeros(length(vec[:,1]), trunc(Int,length(ts)/2))
-    # S = inv(sqrt(varcov(vec)))
-    S = inv(varcov(vec))
+    S = inv(sqrt(varcov(vec)))
+    # S = inv(varcov(vec))
     p = periodogram_matrix(vec; m = m)
     for i in 1:trunc(Int,length(ts)/2)
-        # ev = findmax(real.(eigvals(2*S*p[:,:,i]*S/length(ts))))
-        ev = findmax(real.(eigvals(2*S*p[:,:,i]/length(ts))))
-        append!(result,ev[1])
-        b = inv(S)*eigvecs(S*p[:,:,i]*S)[ev[2],:]
+        ev = findmax(real.(eigvals(2*S*p[:,:,i]*S/length(ts))))
+        # ev = findmax(real.(eigvals(2*S*p[:,:,i]/length(ts))))
+        append!(result, ev[1])
+        b = eigvecs(S*p[:,:,i])[ev[2],:]
+        b = b./sqrt(sum(b.^2))
         # append!(eigvec_any, real.(b))
         eigvec[:,i] = real.(b)
     end
@@ -245,8 +246,8 @@ function get_mappings(data, freq; m = 3)
     window = Int(div(0.04*length(f),1))
     peak_pos = findmin([abs(freq - delta*i) for i in 1:length(f)])[2]
     true_pos = findmax(se[peak_pos-window:peak_pos+window])[2] + peak_pos - window - 1
-    mappings = [string(categories[i]," : ",round(eigvecs[i,true_pos]; digits = 2)) for i in 1:length(categories)]# -1]
-    # push!(mappings, string(unique(data)[end]," : ", 0.0))
+    mappings = [string(categories[i]," : ",round(eigvecs[i,true_pos]; digits = 2)) for i in 1:length(eigvecs[:,1])]
+    push!(mappings, string(unique(data)[end]," : ", 0.0))
     println("position of peak: ",round(f[true_pos],digits = 2)," strengh of peak: ",round(se[true_pos], digits = 2))
     return mappings
 end
