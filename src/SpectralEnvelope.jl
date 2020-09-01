@@ -204,17 +204,20 @@ Computes the spectral envelope of the given time-series.
 """
 function spectral_envelope(ts; m = 3)
     result = Float64[]
-    eigvec_any = []
     vec = vectorize(ts)
-    S = inv(sqrt(varcov(vec)))
-    display(S)
+    eigvec = zeros(length(vec[:,1]), trunc(Int,length(ts)/2))
+    # S = inv(sqrt(varcov(vec)))
+    S = inv(varcov(vec))
     p = periodogram_matrix(vec; m = m)
     for i in 1:trunc(Int,length(ts)/2)
-        append!(result,findmax(eigvals(2*S*p[:,:,i]*S/length(ts)))[1])
-        b = S*eigvecs(S*p[:,:,i]*S)[findmax(eigvals(S*p[:,:,i]*S))[2],:]
-        append!(eigvec_any, b )
+        # ev = findmax(real.(eigvals(2*S*p[:,:,i]*S/length(ts))))
+        ev = findmax(real.(eigvals(2*S*p[:,:,i]/length(ts))))
+        append!(result,ev[1])
+        b = inv(S)*eigvecs(S*p[:,:,i]*S)[ev[2],:]
+        # append!(eigvec_any, real.(b))
+        eigvec[:,i] = real.(b)
     end
-    eigvec = reshape(Array{Float64}(eigvec_any),length(unique(ts)),:)'
+    # eigvec = reshape(Array{Float64}(eigvec_any), length(unique(vec)), :)'
     return collect(1:length(result))/length(ts), result[1:end], eigvec
 end
 
@@ -242,16 +245,16 @@ function get_mappings(data, freq; m = 3)
     window = Int(div(0.04*length(f),1))
     peak_pos = findmin([abs(freq - delta*i) for i in 1:length(f)])[2]
     true_pos = findmax(se[peak_pos-window:peak_pos+window])[2] + peak_pos - window - 1
-    mappings = [string(categories[i]," : ",round(eigvecs[true_pos,i]; digits = 2)) for i in 1:length(categories)]#-1]
-    # push!(mappings, string(categories[end]," : ", 0.0))
+    mappings = [string(categories[i]," : ",round(eigvecs[i,true_pos]; digits = 2)) for i in 1:length(categories)]# -1]
+    # push!(mappings, string(unique(data)[end]," : ", 0.0))
     println("position of peak: ",round(f[true_pos],digits = 2)," strengh of peak: ",round(se[true_pos], digits = 2))
     return mappings
 end
 
 using DelimitedFiles, Plots
-data = readdlm("C:\\Users\\cnelias\\.julia\\dev\\SpectralEnvelope\\test\\DNA_data.txt")[1,:]
-f, se = spectral_envelope(data; m = 1)
-display(plot(f,100*se))
+data = readdlm("C:\\Users\\cnelias\\.julia\\dev\\SpectralEnvelope\\test\\DNA_data.txt", ',')
+f, se = spectral_envelope(data; m = 3)
+display(plot(f, se))
 print(get_mappings(data, 0.33))
 
 function findmax_in(xserie,yserie,xlim)
