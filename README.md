@@ -52,7 +52,7 @@ print(mappings)
 ```
 
 The function scans the vincinity of the provided goal frequency and returns the mapping for the found maxima. It also prints the positions and intensity of the peak so that you may control that you actually identified the desired peak and not a nearby sub-peak.<br/>
-The codons A and G have a similar mapping, so they could have a similar functions : this is however to take with a grain of salt. Indeed, the spectral envelope only seeks to maximize the power-spectrum, if you want to study equivalency of categories, you should also check with a clustering algorithm like https://github.com/johncwok/IntegerIB.jl.git.
+The codons A and G have a similar mapping, so they could potentially have similar functions : this is however not a necessity, as the spectral envelope only seeks to maximize the power-spectrum. If you want to study equivalency of categories, you should also check the results with a clustering algorithm like https://github.com/johncwok/IntegerIB.jl.git.
 
 ### Installation and import 
 ```Julia
