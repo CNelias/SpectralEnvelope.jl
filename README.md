@@ -48,12 +48,11 @@ To get the **optimal mappings** for a given frequency, you can use the ```get_ma
 mappings = get_mappings(data, 0.33)
 >> position of peak: 0.33 strengh of peak: 0.6
 print(mappings)
->> ["A : 0.5", "G : 0.64", "T : 0.64", "C : 0.0"]
+>> ["A : 0.54", "G : 0.62", "T : -0.57", "C : 0.0"]
 ```
 
-
 The function scans the vincinity of the provided goal frequency and returns the mapping for the found maxima. It also prints the positions and intensity of the peak so that you may control that you actually identified the desired peak and not a nearby sub-peak.<br/>
-The codons A and T have the same mapping and so they have similar functions (from the point of view of the time-series).
+The codons A and G have a similar mapping, so they could have a similar functions : this is however to take with a grain of salt. Indeed, the spectral envelope only seeks to maximize the power-spectrum, if you want to study equivalency of categories, you should also check with a clustering algorithm like https://github.com/johncwok/IntegerIB.jl.git.
 
 ### Installation and import 
 ```Julia
