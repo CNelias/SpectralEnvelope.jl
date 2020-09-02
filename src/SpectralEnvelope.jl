@@ -1,4 +1,4 @@
-# module SpectralEnvelope
+module SpectralEnvelope
 
 using FFTW
 using Polynomials
@@ -24,25 +24,25 @@ smoothens the given series by mixen each points with it's neighboors.
 """
 
 function smooth(data::Array{Float64,1}; m = 5)
-    #this can be improved by prealocating memory.
     if m != 0
         smoothed_data = Float64[]
         weigths = Int[]
         for w in collect(-m:m)
-            p = (abs(w)+1)*2
-            if p <= 20
+            p = abs(2*w)+1
+            if p >= 10
                 append!(weigths,p)
             else
-                append!(weigths,20)
+                append!(weigths,10)
             end
         end
+        p_tot = sum([1/w for w in weigths])
         for i in 1:length(data)
             if i > m && i < length(data) - m
                 smoothed_Iw = 0
                 for (l,k) in enumerate(collect(-m:m))
                     smoothed_Iw += (1/weigths[l])*data[i+k]
                 end
-                append!(smoothed_data, smoothed_Iw)
+                append!(smoothed_data, smoothed_Iw/p_tot)
             end
         end
         return smoothed_data
@@ -50,6 +50,7 @@ function smooth(data::Array{Float64,1}; m = 5)
         return data
     end
 end
+
 
 """
 One-hot encodes the time-series. For k categories,
@@ -65,8 +66,7 @@ is mapped to zeros(k - 1).
 
 function vectorize(data)
     categories = unique(data)
-    # deleteat!(categories,length(categories))
-    # deleteat!(categories,1)
+    deleteat!(categories, length(categories))
     sorted_data = zeros(length(categories),length(data))
     for (t,d) in enumerate(data)
         for (i,j) in enumerate(categories)
@@ -96,6 +96,11 @@ function partitioning(x,window::Int,step::Int)
     return [x[i:i+window] for i in 1:step:length(x) if  i + window <= length(x)]
 end
 
+function partitioning(x::Array{Float64,2},window::Int,step::Int)
+    return [x[:,i:i+window-1] for i in 1:step:length(x[1,:]) if  i + window <= length(x[1,:])]
+end
+
+
 """
 returns the power spectrum of a given time serie,
 
@@ -117,48 +122,62 @@ function power_spectrum(x::Array{Float64,1}, window::Int, step::Int)
     return [pxx[i] for i in 1:div(window,2)]
 end
 
-function periodogram_matrix(ts::Array{Float64,2}; m=3)
-    periodo = zeros(length(ts[:,1]), length(ts[:,1]), length(ts[1,:]))
-    DFT = zeros(Complex{Float64}, length(ts[:,1]), length(ts[1,:]))
-    for i in 1:length(ts[:,1])
-        DFT[i,:] = fft(ts[i,:] .- mean(ts[i,:]))
-    end
-    for i in 1:length(ts[:,1])
-        for j in 1:length(ts[:,1])
-            tmp = smooth(real((1/length(ts[1,:]))*DFT[i,:].*conj(DFT[j,:])); m = m)
-            for w in 1:length(ts[1,:])-(2*m+1)
-                periodo[i,j,w] = tmp[w]
+
+"""
+    periodogram_matrix(ts::Array{Float64,2}, demean = false; m=2)
+
+Computes the k x k periodogram matrix (k number of categories).
+If 'average' true, segments data and computes the average periodogram matrix over all segments.
+m is the smoothing parameter.
+"""
+function periodogram_matrix(ts::Array{Float64,2}, average = false; m=2)
+    if average == false
+        periodo = zeros(length(ts[:,1]), length(ts[:,1]), length(ts[1,:]))
+        DFT = zeros(Complex{Float64}, length(ts[:,1]), length(ts[1,:]))
+        for i in 1:length(ts[:,1])
+            DFT[i,:] = fft(ts[i,:] .- mean(ts[i,:]))
+        end
+        for i in 1:length(ts[:,1])
+            for j in 1:length(ts[:,1])
+                tmp = smooth(real((1/length(ts[1,:]))*DFT[i,:].*conj(DFT[j,:])); m = m)
+                for w in 1:length(ts[1,:])-(2*m+1)
+                    periodo[i,j,w] = tmp[w]
+                end
             end
         end
+        return periodo
+    elseif average == true
+        window = Int(floor(length(ts[1,:])/2))
+        step = Int(floor(length(ts[1,:])/4))
+        dims = length(ts[:,1])
+        periodo = zeros(length(ts[:,1]), length(ts[:,1]), window)
+        seg_ts = partitioning(ts, window, step)
+        DFT = []
+        for el in seg_ts
+            tmp = zeros(Complex, dims, window)
+            for i in 1:length(el[:,1])
+                tmp[i,:] = fft(el[i,:] .- mean(el[i,:]) )
+            end
+            push!(DFT, tmp)
+        end
+        for el in DFT
+            for i in 1:dims
+                for j in 1:dims
+                    tmp = smooth(real((1/window)*el[i,:].*conj(el[j,:])); m = m)
+                    for w in 1:window-(2*m+1)
+                        periodo[i,j,w] += tmp[w]
+                    end
+                end
+            end
+        end
+        return periodo./length(seg_ts)
     end
-    return periodo
 end
-
-# function periodogram_matrix(ts::Array{Float64,2}, substract_mean = true; smoothing_degree=3)
-#     periodo = zeros(Float64, length(ts[:,1]), length(ts[:,1]), length(ts[1,:]))
-#
-#     for i in 1:length(ts[:,1])
-#         for j in 1:length(ts[:,1])
-#             tmp = smooth(real((1/length(ts[1,:]))*fft(ts[i,:]).*(conj(fft(ts[j,:])))); m= smoothing_degree)
-#             for w in 1:length(ts[1,:])-(2*smoothing_degree+1)
-#                 if tmp[w] == NaN || tmp[w] == Inf
-#                     print("Unexpected NaN or Inf at position", w)
-#                 else
-#                 periodo[i,j,w] = tmp[w]
-#                 end
-#             end
-#         end
-#     end
-#     return periodo
-# end
-
-
 
 
 """
 Computes the covariance-variance matrix of a given time-series.
 """
-
 function varcov(ts::Array{Float64,2})
     cov_matrix = zeros(length(ts[:,1]), length(ts[:,1]))
     for i in 1:length(ts[:,1])
@@ -168,19 +187,6 @@ function varcov(ts::Array{Float64,2})
     end
     return cov_matrix
 end
-
-# function varcov(ts::Array{Float64,2})
-#     proba = sum(ts, dims = 2)./length(ts[1,:])
-#     cov_matrix = zeros(length(ts[:,1]), length(ts[:,1]))
-#     for i in 1:length(ts[:,1])
-#         if cov_matrix[i,i] == NaN || cov_matrix[i,i] == Inf
-#             print("Unexpected NaN or Inf at position", i)
-#         else
-#         cov_matrix[i,i] = proba[i] - proba[i].^2
-#         end
-#     end
-#     return cov_matrix
-# end
 
 
 """
@@ -207,21 +213,20 @@ function spectral_envelope(ts; m = 3)
     vec = vectorize(ts)
     eigvec = zeros(length(vec[:,1]), trunc(Int,length(ts)/2))
     S = inv(sqrt(varcov(vec)))
+    # alternative definition of S
     # S = inv(varcov(vec))
     p = periodogram_matrix(vec; m = m)
-    for i in 1:trunc(Int,length(ts)/2)
-        ev = findmax(real.(eigvals(2*S*p[:,:,i]*S/length(ts))))
-        # ev = findmax(real.(eigvals(2*S*p[:,:,i]/length(ts))))
+    f_len = trunc(Int,length(p[1,1,:])/2)
+    for i in 1:f_len
+        ev = findmax(real.(eigvals(S*p[:,:,i]*S/f_len)))
+        # ev = findmax(real.(eigvals(S*p[:,:,i]/f_len)))
         append!(result, ev[1])
-        b = eigvecs(S*p[:,:,i])[ev[2],:]
+        b = S*eigvecs(S*p[:,:,i])[ev[2],:]
         b = b./sqrt(sum(b.^2))
-        # append!(eigvec_any, real.(b))
         eigvec[:,i] = real.(b)
     end
-    # eigvec = reshape(Array{Float64}(eigvec_any), length(unique(vec)), :)'
-    return collect(1:length(result))/length(ts), result[1:end], eigvec
+    return collect(1:length(result))/length(p[1,1,:]), result[1:end], eigvec
 end
-
 
 """
      get_mappings(data, freq; m = 3)
@@ -247,16 +252,12 @@ function get_mappings(data, freq; m = 3)
     peak_pos = findmin([abs(freq - delta*i) for i in 1:length(f)])[2]
     true_pos = findmax(se[peak_pos-window:peak_pos+window])[2] + peak_pos - window - 1
     mappings = [string(categories[i]," : ",round(eigvecs[i,true_pos]; digits = 2)) for i in 1:length(eigvecs[:,1])]
-    push!(mappings, string(unique(data)[end]," : ", 0.0))
+    if length(categories) != length(eigvecs[:,1])
+        push!(mappings, string(unique(data)[end]," : ", 0.0))
+    end
     println("position of peak: ",round(f[true_pos],digits = 2)," strengh of peak: ",round(se[true_pos], digits = 2))
     return mappings
 end
-
-using DelimitedFiles, Plots
-data = readdlm("C:\\Users\\cnelias\\.julia\\dev\\SpectralEnvelope\\test\\DNA_data.txt", ',')
-f, se = spectral_envelope(data; m = 3)
-display(plot(f, se))
-print(get_mappings(data, 0.33))
 
 function findmax_in(xserie,yserie,xlim)
     range = []
@@ -272,8 +273,6 @@ function findmax_in(xserie,yserie,xlim)
 end
 
 
+export spectral_envelope, get_mappings, detrend, smooth, power_spectrum
 
-
-# export spectral_envelope, get_mappings, detrend, smooth, power_spectrum
-#
-# end
+end
