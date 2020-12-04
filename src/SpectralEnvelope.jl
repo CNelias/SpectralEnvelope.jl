@@ -251,9 +251,9 @@ function get_mappings(data, freq; m = 3)
     window = Int(div(0.04*length(f),1))
     peak_pos = findmin([abs(freq - delta*i) for i in 1:length(f)])[2]
     true_pos = findmax(se[peak_pos-window:peak_pos+window])[2] + peak_pos - window - 1
-    mappings = [string(categories[i]," : ",round(eigvecs[i,true_pos]; digits = 2)) for i in 1:length(eigvecs[:,1])]
+    mappings = Dict(categories[i] => round(eigvecs[i,true_pos]; digits = 2) for i in 1:length(eigvecs[:,1]))
     if length(categories) != length(eigvecs[:,1])
-        push!(mappings, string(unique(data)[end]," : ", 0.0))
+        push!(mappings, unique(data)[end] => 0.0)
     end
     println("position of peak: ",round(f[true_pos],digits = 2)," strengh of peak: ",round(se[true_pos], digits = 2))
     return mappings
@@ -272,7 +272,25 @@ function findmax_in(xserie,yserie,xlim)
     return max, xserie[real_pos[pos]], real_pos[pos]
 end
 
+"""
+    apply_mapping(ts, mapping)
 
-export spectral_envelope, get_mappings, detrend, smooth, power_spectrum
+Transforms the input time-series 'ts' according to the mapping 'mapping'.
+Typically, 'mapping' would be the output of the 'get_mappings' function, although you can provide your own.
+'mapping' should be a Dict specifying each value and what it should be mappied to. Example:
+{"A" : 0.54, "G" : 0.62, "T" : -0.57, "C" : 0.0}
+
+Returns an array which correspond to the mapped series according to 'mapping'
+"""
+function apply_mapping(ts, mapping)
+    mapped_series = deepcopy(ts)
+    for (index, value) in enumerate(mapped_series)
+        mapped_series[index] = mapping[value]
+    end
+    return mapped_series
+end
+
+
+export spectral_envelope, get_mappings, detrend, smooth, power_spectrum, apply_mapping
 
 end
