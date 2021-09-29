@@ -1,5 +1,6 @@
 name = "SpectralEnvelope"
 uuid = "ff710082-a9bc-57f3-81b5-980fc0acaaef"
+authors = ["Corentin Nelias <cwokpoubelle@laposte.net>"]
 version = "1.2.1"
 
 [deps]
