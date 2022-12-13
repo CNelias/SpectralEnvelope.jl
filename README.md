@@ -6,7 +6,7 @@
 
 
 # Spectral Envelope
-A fast and easy to use julia implementation of the spectral envelope method, used in categorical data analysis.
+A fast and easy to use implementation of the spectral envelope method, used in categorical data analysis. This module is now part of the package [CategoricalTimeSeries.jl](https://github.com/johncwok/CategoricalTimeSeries.jl)
 
 The **spectral envelope** is a tool to study cyclic behaviors in categorical data. It is more efficient than the traditional approach of attributing a different number to each category before computing the power-spectral density.<br/>
 
