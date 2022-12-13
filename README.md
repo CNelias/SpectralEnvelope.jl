@@ -60,15 +60,6 @@ mapped_ts = apply_mapping(input_series, mapping)
 ```
 `mapping` being here the mapping returned by `get_mappings`.
 
-### Installation and import 
-```Julia
-# installing the module
-Using Pkg
-Pkg.clone(“https://github.com/johncwok/SpectralEnvelope.jl.git”)
-# importing the module
-Using SpectralEnvelope
-```
-
 ### Citing
 If you used this module in a scientific publication, please consider citing the package it came from:
 ```Bibtex
@@ -83,6 +74,14 @@ If you used this module in a scientific publication, please consider citing the 
 }
 ```
 
+### Installation and import 
+```Julia
+# installing the module
+Using Pkg
+Pkg.clone(“https://github.com/johncwok/SpectralEnvelope.jl.git”)
+# importing the module
+Using SpectralEnvelope
+```
 
 ## To-do
 * Implement windowing & averaging (periodogram bias correction).
