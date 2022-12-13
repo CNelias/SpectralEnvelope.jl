@@ -69,6 +69,21 @@ Pkg.clone(“https://github.com/johncwok/SpectralEnvelope.jl.git”)
 Using SpectralEnvelope
 ```
 
+### Citing
+If you used this module in a scientific publication, please consider citing the package it came from:
+```Bibtex
+@article{nelias2021categoricaltimeseries,
+  title={CategoricalTimeSeries. jl: A toolbox for categorical time-series analysis},
+  author={Nelias, Corentin},
+  journal={Journal of Open Source Software},
+  volume={6},
+  number={67},
+  pages={3733},
+  year={2021}
+}
+```
+
+
 ## To-do
 * Implement windowing & averaging (periodogram bias correction).
 * Implement bootstrap confidence intervals.
